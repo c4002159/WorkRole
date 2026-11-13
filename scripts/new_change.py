@@ -52,7 +52,10 @@ def main():
         text = text.replace("CHG-XXX 名称", f"{chg_id} {name}").replace("YYYY-MM-DD", today)
         f.write_text(text, encoding="utf-8")
     print(f"已创建 {target.relative_to(ROOT)}")
-    print("下一步:在 docs/issues.md 登记一条类型为'变更请求'的问题,再用 README 里的消息模板启动产品 agent。")
+    print("下一步:")
+    print("1. 在 docs/issues.md 登记一条类型为'变更请求'的问题。")
+    print("2. 先提交一次(git add . && git commit),否则产品的路径检查会把其他角色的新文件报为越权。")
+    print("3. 用 使用手册.md §7 里的消息模板启动产品 agent。")
     return 0
 
 
