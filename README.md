@@ -18,3 +18,5 @@
 | `scripts/check_paths.py` | 检查角色有没有改不该改的文件 |
 | `scripts/new_change.py` | 创建变更文件夹 |
 | `使用手册.md` | 给负责人的完整操作流程 |
+| `提示词库.md` | 通用提示词:读仓库(P0)、产出模板文件(P1)、排版整理(P2) |
+| `docs/rules/format.md` | 文档排版规范,所有角色适用 |
