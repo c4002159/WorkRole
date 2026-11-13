@@ -2,10 +2,12 @@
 """检查某个角色的改动是否越权。
 
 用法:
-  python scripts/check_paths.py <角色> [--change] [--since <提交号>]
+  python scripts/check_paths.py <角色> [--change] [--chg CHG-xxx] [--since <提交号>]
 
   角色:analyst | product | dev | test | maintainer
   --change   变更阶段(首次上线后):基线文档只读,只能写变更文件夹里的增量
+  --chg      指定本次变更编号(如 CHG-002),隐含 --change;
+             只允许写该编号的文件夹,写其他变更文件夹视为越权
   --since    检查自 <提交号> 以来的全部改动(含已提交的)。
              默认只检查工作区里未提交的改动(已暂存、未暂存、未跟踪)
 
@@ -15,8 +17,11 @@
 在仓库根目录运行。有越权改动时退出码为 1。
 局限:只能判断"改了哪些文件",判断不了改得对不对,也区分不了改动是谁产生的。
 每个角色请在各自独立的工作副本或独立的时间段里工作。
+不指定 --chg 时,变更阶段允许写任何 CHG 文件夹;同时有多个变更进行时请务必加 --chg。
+对 src/ 等代码目录只按路径放行,不检查内容(例如是否越界改了别的功能)。
 """
 import fnmatch
+import re
 import subprocess
 import sys
 
@@ -119,21 +124,26 @@ def matches(path, patterns):
 def parse_args(argv):
     change = False
     since = None
+    chg = None
     rest = []
     i = 0
     while i < len(argv):
         a = argv[i]
         if a == "--change":
             change = True
-        elif a == "--since":
+        elif a in ("--since", "--chg"):
             if i + 1 >= len(argv):
                 return None
-            since = argv[i + 1]
+            if a == "--since":
+                since = argv[i + 1]
+            else:
+                chg = argv[i + 1]
+                change = True
             i += 1
         else:
             rest.append(a)
         i += 1
-    return change, since, rest
+    return change, since, chg, rest
 
 
 def main():
@@ -141,13 +151,18 @@ def main():
     if parsed is None:
         print(__doc__)
         return 2
-    change, since, rest = parsed
+    change, since, chg, rest = parsed
     table = ALLOWED_CHANGE if change else ALLOWED_INITIAL
     if len(rest) != 1 or rest[0] not in table:
         print(__doc__)
         return 2
     role = rest[0]
     allowed = list(table[role])
+    if chg:
+        if not re.fullmatch(r"CHG-\d+", chg):
+            print("--chg 的格式应为 CHG-001 这样的编号")
+            return 2
+        allowed = [p.replace("docs/changes/*/", f"docs/changes/{chg}-*/") for p in allowed]
     if role != "maintainer":
         allowed += COMMON
     try:
