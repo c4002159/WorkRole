@@ -54,7 +54,6 @@ ALLOWED_INITIAL = {
     "analyst": ["docs/00-baseline.md"],
     "product": [
         "docs/01-product.md",
-        "docs/01a-competitor.md",
         "docs/prototypes/*",
     ],
     "dev": ["docs/02-tech.md", "docs/openapi.yaml"] + DEV_COMMON,
